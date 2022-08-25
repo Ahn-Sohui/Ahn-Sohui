@@ -72,7 +72,6 @@ public class Main {
 			if(pi==pj) continue;
 			
 			union(pi,pj);
-			//오르막길을 많이 오르는 최악의 경우
 			sel[cnt]=college[i];
 			if(sel[cnt][2]==0) slope_up2++;
 			cnt++;
