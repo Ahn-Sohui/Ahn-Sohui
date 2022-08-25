@@ -2,103 +2,112 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.PriorityQueue;
 import java.util.StringTokenizer;
 
 public class Main {
-	static int[][] college;
-	static int[] parent;
-	static int[] rank;
-	static int[][] sel;
+	static class Node{
+		int vertex,weight;
+		Node next;
+		
+		Node(int vertex,int weight,Node next){
+			this.vertex=vertex;
+			this.weight=weight;
+			this.next=next;
+		}
+		Node(int vertex,int weight){
+			this.vertex=vertex;
+			this.weight=weight;
+		}
+	}
 	public static void main(String[] args) throws IOException {
 		BufferedReader br =new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer str= new StringTokenizer(br.readLine());
-		int n=Integer.parseInt(str.nextToken())+1;
-		int m=Integer.parseInt(str.nextToken())+1;
+		int V=Integer.parseInt(str.nextToken())+1;
+		int E=Integer.parseInt(str.nextToken())+1;
 		
-		college=new int[m][3];
+		Node[] college=new Node[V];
 		
-		for(int i=0;i<m;i++) {
-			str=new StringTokenizer(br.readLine());
-			college[i][0]=Integer.parseInt(str.nextToken()); //출발
-			college[i][1]=Integer.parseInt(str.nextToken()); //도착
-			college[i][2]=Integer.parseInt(str.nextToken()); //경사 0:오르막 1:내리막
+		for(int i=0;i<E;i++) {
+			str= new StringTokenizer(br.readLine());
+			int from=Integer.parseInt(str.nextToken());
+			int to =Integer.parseInt(str.nextToken());
+			int weight=Integer.parseInt(str.nextToken());
+			
+			//무향 그래프이기 때문에 양방향으로 넣어줘야함
+			college[from]=new Node(to,weight,college[from]);
+			college[to]=new Node(from,weight,college[to]);
 		}
 		
-		Arrays.sort(college,new Comparator<int[]>() {
-
-			@Override
-			public int compare(int[] o1, int[] o2) {
-				// TODO Auto-generated method stub
-				return Integer.compare(o1[2], o2[2]); //경사도에 따라 오름차순
+		int[] minEdge=new int[V];
+		boolean[] v= new boolean[V];
+		
+		Arrays.fill(minEdge,Integer.MAX_VALUE);
+		//0번 부터 시작
+		minEdge[0]=-1;
+		
+		PriorityQueue<Node> pq=new PriorityQueue<>((v1,v2)->v1.weight-v2.weight);
+		
+		pq.offer(new Node(0,minEdge[0]));
+		int cnt=0,ans1=0;
+		while(true) {
+			Node minNode=pq.poll();
+			//이미 추가된 정점이라면
+			if(v[minNode.vertex]) continue;
+			
+			//추가
+			v[minNode.vertex]=true;
+			if(++cnt==V) break;
+			
+			for(Node temp=college[minNode.vertex]; temp!=null;temp=temp.next) {
+				if(!v[temp.vertex] && minEdge[temp.vertex]>temp.weight)
+				{
+					minEdge[temp.vertex]=temp.weight;
+					pq.offer(new Node(temp.vertex, temp.weight));
+				}
 			}
-		});
-		sel=new int[n-1][3];
-		parent=new int[n];
-		rank=new int[n];
-		
-		for(int i=0;i<n;i++) {
-			parent[i]=i;
 		}
 		
-		int cnt=0;
-		int slope_up1=0; //오르막을 몇 번 오르는지
-		for(int i=0;i<m;i++) {
-			//싸이클 여부를 확인
-			int pi=findSet(college[i][0]);
-			int pj=findSet(college[i][1]);
-			
-			if(pi==pj) continue;
-			
-			union(pi,pj);
-			//오르막길을 많이 오르는 최악의 경우
-			sel[cnt]=college[i];
-			if(sel[cnt][2]==0) slope_up1++;
-			cnt++;
-			if(cnt==n-1) break;
+		for(int i=0;i<V;i++) {
+			if(minEdge[i]==0) ans1++;
 		}
-	
-		for(int i=0;i<n;i++) {
-			parent[i]=i;
-		}
+		
+		//초기화
+		
 		cnt=0;
-		int slope_up2=0;
-		for(int i=m-1;i>=0;i--) {
-			//뒤에서 부터 확인하면 내리막길을 더 많이 포함
-			//싸이클 여부를 확인
-			int pi=findSet(college[i][0]);
-			int pj=findSet(college[i][1]);
-			
-			if(pi==pj) continue;
-			
-			union(pi,pj);
-			sel[cnt]=college[i];
-			if(sel[cnt][2]==0) slope_up2++;
-			cnt++;
-			if(cnt==n-1) break;
-		}
-		int ans= (int)(Math.pow(slope_up1, 2))-(int)(Math.pow(slope_up2,2));
-		System.out.println(ans);
-	}
-	
-	private static void union(int i, int j) {
-		int pi=findSet(i);
-		int pj=findSet(j);
 		
-		if(rank[pi]>rank[pj]) {
-			parent[pj]=pi;
-		}
-		else {
-			parent[pi]=pj;
-			if(rank[pi]==rank[pj]) {
-				rank[pj]++;
+		Arrays.fill(minEdge,Integer.MIN_VALUE);
+		Arrays.fill(v, false);
+		
+		
+		minEdge[0]=-1;
+		PriorityQueue<Node> pq2=new PriorityQueue<>((v1,v2)->v2.weight-v1.weight);
+		pq2.offer(new Node(0,minEdge[0]));
+		
+		while(true) {
+			Node minNode=pq2.poll();
+			//이미 추가된 정점이라면
+			if(v[minNode.vertex]) continue;
+			
+			//추가
+			v[minNode.vertex]=true;
+			if(++cnt==V) break;
+			
+			for(Node temp=college[minNode.vertex]; temp!=null;temp=temp.next) {
+				if(!v[temp.vertex] && minEdge[temp.vertex]<temp.weight)
+				{
+					minEdge[temp.vertex]=temp.weight;
+					pq2.offer(new Node(temp.vertex, temp.weight));
+				}
 			}
 		}
+		//System.out.println(Arrays.toString(minEdge));
+		int ans2=0;
+		for(int i=0;i<V;i++) {
+			if(minEdge[i]==0) ans2++;
+		}
+		//System.out.println(Arrays.toString(minEdge));
+		//System.out.println(ans1+" "+ans2);
+		System.out.println(ans1*ans1-ans2*ans2);
 	}
-
-	private static int findSet(int i) {
-		if(parent[i]==i) return i;
-		return parent[i]=findSet(parent[i]);
-	}
-
 }
