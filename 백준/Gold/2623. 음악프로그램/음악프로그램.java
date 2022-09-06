@@ -23,6 +23,7 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		BufferedReader br =new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer str= new StringTokenizer(br.readLine());
+		StringBuilder sb=new StringBuilder();
 		
 		n=Integer.parseInt(str.nextToken())+1;
 		m=Integer.parseInt(str.nextToken());
@@ -51,10 +52,12 @@ public class Main {
 		
 		if(setList.size()==n-1) {
 			for(int i=0;i<setList.size();i++) {
-				System.out.println(setList.get(i));
+				sb.append(setList.get(i)).append("\n");
 			}
 		}else
-			System.out.println(0);
+			sb.append(0);
+		
+		System.out.println(sb);
 	}
 	
 	private static ArrayList<Integer> topologySort() {
