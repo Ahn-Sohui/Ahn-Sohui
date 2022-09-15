@@ -49,8 +49,7 @@ public class Main {
 			cnt+=tmp.val;
 			
 			for(int i=1;i<=v;i++) {
-				int n=Bacon[tmp.num][i];
-				if(n==1 && !visited[i]) {
+				if(Bacon[tmp.num][i]==1 && !visited[i]) {
 					visited[i]=true;
 					q.offer(new Pair(i,tmp.val+1));
 				}
