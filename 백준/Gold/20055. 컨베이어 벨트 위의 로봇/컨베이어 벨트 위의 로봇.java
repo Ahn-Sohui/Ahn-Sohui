@@ -67,29 +67,27 @@ public class Main {
 
 	private static void moving() {
 		// 컨베이어 벨트 & 로봇 한 칸 이동
-		// 로봇 이동
-		for(int i=n-2;i>=0;i--) {
-			if(robot[i]) {
-				if(!robot[i+1]) {
-					robot[i]=false;
-					robot[i+1]=true;
+		// 컨베이어 벨트도 이동
+		int num = belt[1][0];
+		for (int i = 1; i < n; i++) {
+			belt[1][i - 1] = belt[1][i];
+		}
+
+		belt[1][n - 1] = belt[0][n - 1];
+
+		for (int i = n - 2; i >= 0; i--) {
+			belt[0][i + 1] = belt[0][i];
+			if (robot[i]) {
+				if (!robot[i + 1]) {
+					robot[i] = false;
+					robot[i + 1] = true;
 				}
 			}
 		}
-		
-		if(robot[n-1]) robot[n-1]=false;
-		//컨베이어 벨트도 이동
-		int num=belt[1][0];
-		for(int i=1;i<n;i++) {
-			belt[1][i-1]=belt[1][i];
-		}
+		belt[0][0] = num;
 
-		belt[1][n-1]=belt[0][n-1];
-
-		for(int i=n-2;i>=0;i--) {
-			belt[0][i+1]=belt[0][i];
-		}
-		belt[0][0]=num;
+		if (robot[n - 1])
+			robot[n - 1] = false;
 	}
 
 	private static int chkBlank(int[][] belt) {
